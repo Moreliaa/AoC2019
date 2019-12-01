@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClCompile Include="AoC2019.cpp" />
     <ClCompile Include="Day1.cpp" />
+    <ClCompile Include="FileReader.cpp" />
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

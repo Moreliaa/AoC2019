@@ -3,8 +3,6 @@
 
 int main()
 {
-	string output = "Text";
-	cout << output << endl;
 	Day1::run();
 	system("pause");
 	return 0;
