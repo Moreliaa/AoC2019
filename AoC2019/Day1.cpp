@@ -2,20 +2,20 @@
 #include "FileReader.cpp";
 
 class Day1 {
-	static long calcFuel(long mass) {
-		long result = (mass / 3) - 2; // implicit floor of mass / 3
+	static int calcFuel(int mass) {
+		int result = (mass / 3) - 2; // implicit floor of mass / 3
 		return result >= 0 ? result : 0;
 	}
 
-	static long calcFuel(const string mass) {
+	static int calcFuel(const string mass) {
 		if (mass.compare("") == 0)
 			return 0;
 		return calcFuel(stoi(mass, nullptr, 10));
 	}
 
-	static long calcFuel_Pt2(const string mass) {
-		long result = 0;
-		long lastVal = calcFuel(mass);
+	static int calcFuel_Pt2(const string mass) {
+		int result = 0;
+		int lastVal = calcFuel(mass);
 		while (lastVal > 0) {
 			result += lastVal;
 			lastVal = calcFuel(lastVal);
@@ -26,7 +26,7 @@ class Day1 {
 public:
 	static void run() {
 		vector<string> input = FileReader::readFile("input/Day1.txt");
-		long result = 0;
+		int result = 0;
 		for each (string line in input)
 		{
 			result += calcFuel(line);
