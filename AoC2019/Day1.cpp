@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "FileReader.cpp";
+#include "Utilities.cpp"
 
 class Day1 {
 	static int calcFuel(int mass) {
@@ -25,7 +25,7 @@ class Day1 {
 
 public:
 	static void run() {
-		vector<string> input = FileReader::readFile("input/Day1.txt");
+		vector<string> input = Utilities::readFile("input/Day1.txt");
 		int result = 0;
 		for each (string line in input)
 		{
