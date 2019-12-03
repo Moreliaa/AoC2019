@@ -1,3 +1,5 @@
+/Release/*
+/AoC2019/Release/*
 /Run/*
 /AoC2019/Run/*
 /Debug/*
