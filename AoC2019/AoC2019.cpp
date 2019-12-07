@@ -10,10 +10,10 @@ int main()
 {
 	auto start = chrono::system_clock::now();
 	//Day1::run();
-	Day2::run();
+	//Day2::run();
 	//Day3::run();
 	//Day4::run();
-	//Day5::run();
+	Day5::run();
 	auto end = chrono::system_clock::now();
 	chrono::duration<double> elapsed_time = end - start;
 	cout << "Time spent: " << elapsed_time.count() << " seconds" << endl;
