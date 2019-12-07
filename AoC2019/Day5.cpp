@@ -9,8 +9,8 @@ public:
 		vector<string> fileContent = Utilities::readFile("input/Day5.txt");
 		vector<string> inputAsString = Utilities::splitString(fileContent.at(0), ",");
 		vector<int> input;
-		for each (string line in inputAsString) {
-			input.push_back(stoi(line, nullptr, 10));
+		for each (string number in inputAsString) {
+			input.push_back(stoi(number, nullptr, 10));
 		}
 		IntcodeC::runProgram(input);
 	}

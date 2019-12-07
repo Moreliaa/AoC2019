@@ -9,8 +9,8 @@ public:
 		vector<string> fileContent = Utilities::readFile("input/Day2.txt");
 		vector<string> inputAsString = Utilities::splitString(fileContent.at(0), ",");
 		vector<int> input_cache;
-		for each (string line in inputAsString) {
-			input_cache.push_back(stoi(line, nullptr, 10));
+		for each (string number in inputAsString) {
+			input_cache.push_back(stoi(number, nullptr, 10));
 		}
 		{
 			vector<int> input(input_cache);
