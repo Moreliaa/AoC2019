@@ -19,7 +19,6 @@ class Day6 {
 		}
 
 		Orbiter(string name) {
-			Orbiter();
 			this->name = name;
 			this->seen = false;
 			this->nestingLevel = 0;
