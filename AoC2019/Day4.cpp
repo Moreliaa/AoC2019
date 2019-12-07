@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include <regex>
 
 class Day4 {
 	static bool checkPw(string str, bool strict) {
