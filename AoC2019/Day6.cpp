@@ -7,17 +7,21 @@ class Day6 {
 	public:
 		string name;
 		int nestingLevel;
+		bool seen;
 		Orbiter *parent;
 		vector<Orbiter*> children;
 
 		Orbiter() {
 			this->name = "";
+			this->seen = false;
 			this->nestingLevel = 0;
 			this->parent = nullptr;
 		}
 
 		Orbiter(string name) {
+			Orbiter();
 			this->name = name;
+			this->seen = false;
 			this->nestingLevel = 0;
 			this->parent = nullptr;
 		}
@@ -38,6 +42,24 @@ class Day6 {
 		}
 		for each(Orbiter *child in node.children) {
 			countOrbits(*child, direct, indirect);
+		}
+	}
+
+	static void searchTarget(Orbiter &current, Orbiter &target, int steps) {
+		if (current.name == target.name) {
+			cout << "Steps to Santa: " << steps - 2 << endl; // subtract 2 since origin and target nodes aren't required to be stepped into
+			return;
+		} else {
+			current.seen = true;
+			steps++;
+
+			if (current.parent != nullptr && !current.parent->seen)
+				searchTarget(*current.parent, target, steps);
+
+			for each(Orbiter *child in current.children) {
+				if (!child->seen)
+					searchTarget(*child, target, steps);
+			}
 		}
 	}
 
@@ -67,6 +89,8 @@ public:
 		countOrbits(orbits["COM"], direct, indirect);
 
 		cout << "Direct: " << direct << " Indirect: " << indirect << " Total: " << direct + indirect << endl;
+
+		searchTarget(orbits["YOU"], orbits["SAN"], 0);
 
 	}
 };
