@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "Utilities.cpp"
 
 class IntcodeC {
 	static int resolveParam(vector<int> &input, vector<int> &command, int param, unsigned digit_idx) {
@@ -34,7 +35,7 @@ class IntcodeC {
 		return digits;
 	}
 
-	static int handleOpcode(vector<int> &input, int idx) {
+	static int handleOpcode(vector<int> &input, int idx, istream &s_in, ostream &s_out) {
 		vector<int> command = extractCommand(input[idx]);
 		int opcode;
 		if (command.size() == 1)
@@ -51,12 +52,21 @@ class IntcodeC {
 			return idx + 4;
 		case 3: // input
 			int userInput;
-			cout << "Input: ";
-			cin >> userInput;
+			if (&s_in == &cin) {
+				cout << "Input: ";
+				s_in >> userInput;
+			}
+			else {
+				string line;
+				getline(s_in, line);
+				userInput = stoi(line, nullptr, 10);
+			}
 			input[resolveParam(input, command, idx, 1)] = userInput;
 			return idx + 2;
 		case 4: // outputs
-			cout << "Outputs: " << input[resolveParam(input, command, idx, 1)] << endl;
+			if (&s_out == &cout)
+				s_out << "Outputs: ";
+			s_out << input[resolveParam(input, command, idx, 1)] << endl;
 			return idx + 2;
 		case 5: // jump-if-true
 			return input[resolveParam(input, command, idx, 1)] != 0 ? input[resolveParam(input, command, idx, 2)] : idx + 3;
@@ -76,10 +86,10 @@ class IntcodeC {
 		}
 	}
 public:
-	static void runProgram(vector<int> &input) {
+	static void runProgram(vector<int> &input, istream &s_in, ostream &s_out) {
 		int idx = 0;
 		do {
-			idx = handleOpcode(input, idx);
+			idx = handleOpcode(input, idx, s_in, s_out);
 		} while (idx != -1);
 	}
 
@@ -87,8 +97,22 @@ public:
 		input[1] = noun;
 		input[2] = verb;
 
-		runProgram(input);
+		runProgram(input, cin, cout);
 		return input[0];
+	}
+
+	static vector<int> getInput(string filenameOrString, bool interpretAsString=false) {	
+		vector<string> fileContent;
+		if (interpretAsString)
+			fileContent.push_back(filenameOrString);
+		else
+			fileContent = Utilities::readFile(filenameOrString);
+		vector<string> inputAsString = Utilities::splitString(fileContent.at(0), ",");
+		vector<int> input;
+		for each (string number in inputAsString) {
+			input.push_back(stoi(number, nullptr, 10));
+		}
+		return input;
 	}
 
 };

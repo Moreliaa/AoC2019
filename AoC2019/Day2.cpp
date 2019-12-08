@@ -1,17 +1,11 @@
 #include "stdafx.h"
-#include "Utilities.cpp"
 #include "IntcodeC.cpp"
 
 class Day2 {
 
 public:
 	static void run() {
-		vector<string> fileContent = Utilities::readFile("input/Day2.txt");
-		vector<string> inputAsString = Utilities::splitString(fileContent.at(0), ",");
-		vector<int> input_cache;
-		for each (string number in inputAsString) {
-			input_cache.push_back(stoi(number, nullptr, 10));
-		}
+		vector<int> input_cache = IntcodeC::getInput("input/Day2.txt");
 		{
 			vector<int> input(input_cache);
 			cout << "1202 program alarm: " << IntcodeC::runProgram(input, 12, 2) << endl;
