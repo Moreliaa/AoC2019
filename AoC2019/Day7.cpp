@@ -156,8 +156,6 @@ class Day7 {
 
 				int returnCode = IntcodeC::runProgram(progs[input_idx], s_io, s_io, true);
 				if (returnCode == 99 && input_idx == amps.size() - 1) {
-					if (input_idx != amps.size() - 1)
-						cout << "Halted at incorrect amp: " << input_idx << endl;
 					getline(s_io, nextInput);
 					results.push_back(stoi(nextInput, nullptr, 10));
 					break;
