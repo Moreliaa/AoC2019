@@ -120,27 +120,23 @@ class Day7 {
 		}
 		return results;
 	}
+
+	static void runPart(vector<Amp> &amps, vector<int> &input_cache, bool feedbackMode) {
+		int maximum = 0;
+		vector<int>	results = runAmps(amps, input_cache, feedbackMode);
+		for (unsigned i = 0; i < results.size(); i++)
+		{
+			maximum = max(maximum, results[i]);
+		}
+		cout << "Maximum Output: " << maximum << endl;
+	}
 	
 public:
 	static void run() {
 		vector<int> input_cache = IntcodeC::getInput("input/Day7.txt");
 		vector<Amp> amps = initAmps(input_cache, 5, 0, 4);
-
-		int maximum = 0;
-		vector<int>	results = runAmps(amps, input_cache, false);
-		for (unsigned i = 0; i < results.size(); i++)
-		{
-			maximum = max(maximum, results[i]);
-		}
-		cout << "Maximum Output Pt1: " << maximum << endl;
-
+		runPart(amps, input_cache, false);
 		amps = initAmps(input_cache, 5, 5, 9);
-		maximum = 0;
-		results = runAmps(amps, input_cache, true);
-		for (unsigned i = 0; i < results.size(); i++)
-		{
-			maximum = max(maximum, results[i]);
-		}
-		cout << "Maximum Output Pt2: " << maximum << endl;
+		runPart(amps, input_cache, true);
 	}
 };
