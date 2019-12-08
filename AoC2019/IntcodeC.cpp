@@ -2,6 +2,21 @@
 #include "stdafx.h"
 #include "Utilities.cpp"
 
+class IntcodeProgram {
+public:
+	vector<int> *input;
+	int idx;
+
+	IntcodeProgram() {
+		this->idx = 0;
+	}
+
+	IntcodeProgram(vector<int> &input) {
+		this->input = &input;
+		this->idx = 0;
+	}
+};
+
 class IntcodeC {
 	static int resolveParam(vector<int> &input, vector<int> &command, int param, unsigned digit_idx) {
 		int param_mode = command.size() >= 2 + digit_idx ? command[command.size() - 2 - digit_idx] : 0;
@@ -35,7 +50,21 @@ class IntcodeC {
 		return digits;
 	}
 
-	static int handleOpcode(vector<int> &input, int idx, istream &s_in, ostream &s_out) {
+	static int peekOpcode(IntcodeProgram &prog) {
+		vector<int> &input = *prog.input;
+		int &idx = prog.idx;
+		vector<int> command = extractCommand(input[idx]);
+		int opcode;
+		if (command.size() == 1)
+			opcode = command[0];
+		else
+			opcode = command[command.size() - 2] * 10 + command[command.size() - 1];
+		return opcode;
+	}
+
+	static bool handleOpcode(IntcodeProgram &prog, istream &s_in, ostream &s_out, bool haltOnOutput=false) {
+		vector<int> &input = *prog.input;
+		int &idx = prog.idx;
 		vector<int> command = extractCommand(input[idx]);
 		int opcode;
 		if (command.size() == 1)
@@ -46,10 +75,12 @@ class IntcodeC {
 		switch (opcode) {
 		case 1: // add
 			input[resolveParam(input, command, idx, 3)] = input[resolveParam(input, command, idx, 1)] + input[resolveParam(input, command, idx, 2)];
-			return idx + 4;
+			idx = idx + 4;
+			return false;
 		case 2: // mul
 			input[resolveParam(input, command, idx, 3)] = input[resolveParam(input, command, idx, 1)] * input[resolveParam(input, command, idx, 2)];
-			return idx + 4;
+			idx = idx + 4;
+			return false;
 		case 3: // input
 			int userInput;
 			if (&s_in == &cin) {
@@ -62,35 +93,47 @@ class IntcodeC {
 				userInput = stoi(line, nullptr, 10);
 			}
 			input[resolveParam(input, command, idx, 1)] = userInput;
-			return idx + 2;
+			idx = idx + 2;
+			return false;
 		case 4: // outputs
 			if (&s_out == &cout)
 				s_out << "Outputs: ";
 			s_out << input[resolveParam(input, command, idx, 1)] << endl;
-			return idx + 2;
+			idx = idx + 2;
+			return haltOnOutput;
 		case 5: // jump-if-true
-			return input[resolveParam(input, command, idx, 1)] != 0 ? input[resolveParam(input, command, idx, 2)] : idx + 3;
+			idx = input[resolveParam(input, command, idx, 1)] != 0 ? input[resolveParam(input, command, idx, 2)] : idx + 3;
+			return false;
 		case 6: // jump-if-false
-			return input[resolveParam(input, command, idx, 1)] == 0 ? input[resolveParam(input, command, idx, 2)] : idx + 3;
+			idx = input[resolveParam(input, command, idx, 1)] == 0 ? input[resolveParam(input, command, idx, 2)] : idx + 3;
+			return false;
 		case 7: // less than
 			input[resolveParam(input, command, idx, 3)] = input[resolveParam(input, command, idx, 1)] < input[resolveParam(input, command, idx, 2)] ? 1 : 0;
-			return idx + 4;
+			idx = idx + 4;
+			return false;
 		case 8: // equals
 			input[resolveParam(input, command, idx, 3)] = input[resolveParam(input, command, idx, 1)] == input[resolveParam(input, command, idx, 2)] ? 1 : 0;
-			return idx + 4;
+			idx = idx + 4;
+			return false;
 		case 99:
-			return -1;
+			return true;
 		default:
 			cout << "Invalid opcode: " << opcode << endl;
-			return -1;
+			return true;
 		}
 	}
 public:
-	static void runProgram(vector<int> &input, istream &s_in, ostream &s_out) {
-		int idx = 0;
+	static int runProgram(IntcodeProgram &prog, istream &s_in, ostream &s_out, bool haltOnOutput=false) {
+		bool halt;
 		do {
-			idx = handleOpcode(input, idx, s_in, s_out);
-		} while (idx != -1);
+			halt = handleOpcode(prog, s_in, s_out, haltOnOutput);
+		} while (!halt);
+		return peekOpcode(prog);
+	}
+
+	static int runProgram(vector<int> &input, istream &s_in, ostream &s_out, bool haltOnOutput=false) {
+		IntcodeProgram prog(input);
+		return runProgram(prog, s_in, s_out, haltOnOutput);
 	}
 
 	static int runProgram(vector<int> &input, int noun, int verb) {
