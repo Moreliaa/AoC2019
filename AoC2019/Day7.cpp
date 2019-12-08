@@ -4,25 +4,9 @@
 #include <algorithm>
 
 class Day7 {
-	class Result {
-	public:
-		vector<int> usedPhases;
-		int result;
-
-		Result() {
-			this->result = 0;
-		}
-
-		Result(vector<int> &phases, int result) {
-			this->usedPhases = phases;
-			this->result = result;
-		}
-	};
-
 	class Amp {
 	public:
 		vector<int> program;
-		vector<Result> outputs;
 		int minPhase;
 		int maxPhase;
 
@@ -48,38 +32,6 @@ class Day7 {
 			amps.push_back(Amp(minPhase, maxPhase));
 		}
 		return amps;
-	}
-
-	static void runAmp(vector<Amp> &amps, unsigned idx, vector<int> &input_cache) {
-		Amp &amp = amps[idx];
-		vector<Result> inputs;
-		if (idx == 0)
-			inputs.push_back(Result());
-		else
-			inputs = amps[idx - 1].outputs;
-		
-			amp.initProgram(input_cache);
-		for (unsigned input_idx = 0; input_idx < inputs.size(); input_idx++)
-		{
-			for (int phase = amp.minPhase; phase <= amp.maxPhase; phase++)
-			{
-				Result ampInput = inputs[input_idx];
-				if (find(ampInput.usedPhases.begin(), ampInput.usedPhases.end(), phase) != ampInput.usedPhases.end())
-					continue;
-				stringstream s_io;
-				s_io << phase << endl;
-				s_io << ampInput.result << endl;
-				IntcodeC::runProgram(amp.program, s_io, s_io);
-				int result;
-				s_io >> result;
-				ampInput.usedPhases.push_back(phase);
-				amp.outputs.push_back(Result(ampInput.usedPhases, result));
-			}
-		}
-
-		if (idx < amps.size() - 1)
-			runAmp(amps, idx + 1, input_cache);
-
 	}
 
 	static vector<vector<int>> getPhaseCombinations(int minPhase, int maxPhase) {
@@ -117,7 +69,7 @@ class Day7 {
 		return phaseCombinations;
 	}
 
-	static vector<int> runAmpsFeedbackMode(vector<Amp> &amps, vector<int> &input_cache) {
+	static vector<int> runAmps(vector<Amp> &amps, vector<int> &input_cache, bool feedbackMode = false) {
 		vector<vector<int>> phaseCombinations = getPhaseCombinations(amps[0].minPhase, amps[0].maxPhase);
 		vector<int> results;
 		for each(vector<int> combination in phaseCombinations) {
@@ -160,8 +112,7 @@ class Day7 {
 					results.push_back(stoi(nextInput, nullptr, 10));
 					break;
 				}
-
-				if (input_idx == amps.size() - 1) {
+				if (input_idx == amps.size() - 1 && feedbackMode) {
 					input_idx = -1;
 					firstLoop = false;
 				}
@@ -175,18 +126,17 @@ public:
 		vector<int> input_cache = IntcodeC::getInput("input/Day7.txt");
 		vector<Amp> amps = initAmps(input_cache, 5, 0, 4);
 
-		runAmp(amps, 0, input_cache);
 		int maximum = 0;
-		vector<Result> finalOutputs = amps[amps.size() - 1].outputs;
-		for (unsigned i = 0; i < finalOutputs.size(); i++)
+		vector<int>	results = runAmps(amps, input_cache, false);
+		for (unsigned i = 0; i < results.size(); i++)
 		{
-			maximum = max(maximum, finalOutputs[i].result);
+			maximum = max(maximum, results[i]);
 		}
 		cout << "Maximum Output Pt1: " << maximum << endl;
 
 		amps = initAmps(input_cache, 5, 5, 9);
 		maximum = 0;
-		vector<int>	results = runAmpsFeedbackMode(amps, input_cache);
+		results = runAmps(amps, input_cache, true);
 		for (unsigned i = 0; i < results.size(); i++)
 		{
 			maximum = max(maximum, results[i]);
