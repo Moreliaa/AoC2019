@@ -36,36 +36,13 @@ class Day7 {
 
 	static vector<vector<int>> getPhaseCombinations(int minPhase, int maxPhase) {
 		vector<vector<int>> phaseCombinations;
+		vector<int> combination;
 		for (int i = minPhase; i <= maxPhase; i++)
-		{
-			for (int j = minPhase; j <= maxPhase; j++)
-			{
-				if (j == i)
-					continue;
-				for (int k = minPhase; k <= maxPhase; k++)
-				{
-					if (k == j || k == i)
-						continue;
-					for (int l = minPhase; l <= maxPhase; l++)
-					{
-						if (l == k || l == j || l == i)
-							continue;
-						for (int m = minPhase; m <= maxPhase; m++)
-						{
-							if (m == l || m == k || m == j || m == i)
-								continue;
-							vector<int> phases;
-							phases.push_back(i);
-							phases.push_back(j);
-							phases.push_back(k);
-							phases.push_back(l);
-							phases.push_back(m);
-							phaseCombinations.push_back(phases);
-						}
-					}
-				}
-			}
-		}
+			combination.push_back(i);
+	
+		do {
+			phaseCombinations.push_back(combination);
+		} while (next_permutation(combination.begin(), combination.end()));
 		return phaseCombinations;
 	}
 
