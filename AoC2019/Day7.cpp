@@ -6,7 +6,7 @@
 class Day7 {
 	class Amp {
 	public:
-		vector<int> program;
+		map<long long, long long> program;
 		int minPhase;
 		int maxPhase;
 
@@ -20,12 +20,12 @@ class Day7 {
 			this->maxPhase = maxPhase;
 		}
 
-		void initProgram(vector<int> input) {
+		void initProgram(map<long long, long long> input) {
 			this->program = input;
 		}
 	};
 
-	static vector<Amp> initAmps(vector<int> input, int size, int minPhase, int maxPhase) {
+	static vector<Amp> initAmps(int size, int minPhase, int maxPhase) {
 		vector<Amp> amps;
 		for (int i = 0; i < size; i++)
 		{
@@ -69,9 +69,9 @@ class Day7 {
 		return phaseCombinations;
 	}
 
-	static vector<int> runAmps(vector<Amp> &amps, vector<int> &input_cache, bool feedbackMode = false) {
+	static vector<long long> runAmps(vector<Amp> &amps, map<long long, long long> &input_cache, bool feedbackMode = false) {
 		vector<vector<int>> phaseCombinations = getPhaseCombinations(amps[0].minPhase, amps[0].maxPhase);
-		vector<int> results;
+		vector<long long> results;
 		for each(vector<int> combination in phaseCombinations) {
 			for (unsigned i = 0; i < amps.size(); i++)
 			{
@@ -106,7 +106,7 @@ class Day7 {
 				if (progs.size() <= input_idx)
 					progs.push_back(IntcodeProgram(amps[input_idx].program));
 
-				int returnCode = IntcodeC::runProgram(progs[input_idx], s_io, s_io, true);
+				long long returnCode = IntcodeC::runProgram(progs[input_idx], s_io, s_io, true);
 				if (returnCode == 99 && input_idx == amps.size() - 1) {
 					getline(s_io, nextInput);
 					results.push_back(stoi(nextInput, nullptr, 10));
@@ -121,9 +121,9 @@ class Day7 {
 		return results;
 	}
 
-	static void runPart(vector<Amp> &amps, vector<int> &input_cache, bool feedbackMode) {
-		int maximum = 0;
-		vector<int>	results = runAmps(amps, input_cache, feedbackMode);
+	static void runPart(vector<Amp> &amps, map<long long, long long> &input_cache, bool feedbackMode) {
+		long long maximum = 0;
+		auto results = runAmps(amps, input_cache, feedbackMode);
 		for (unsigned i = 0; i < results.size(); i++)
 		{
 			maximum = max(maximum, results[i]);
@@ -133,10 +133,10 @@ class Day7 {
 	
 public:
 	static void run() {
-		vector<int> input_cache = IntcodeC::getInput("input/Day7.txt");
-		vector<Amp> amps = initAmps(input_cache, 5, 0, 4);
+		auto input_cache = IntcodeC::getInput("input/Day7.txt");
+		vector<Amp> amps = initAmps(5, 0, 4);
 		runPart(amps, input_cache, false);
-		amps = initAmps(input_cache, 5, 5, 9);
+		amps = initAmps(5, 5, 9);
 		runPart(amps, input_cache, true);
 	}
 };

@@ -13,12 +13,12 @@ int main()
 {
 	auto start = chrono::system_clock::now();
 	//Day1::run();
-	//Day2::run();
+	Day2::run();
 	//Day3::run();
 	//Day4::run();
-	//Day5::run();
+	Day5::run();
 	//Day6::run();
-	//Day7::run();
+	Day7::run();
 	Day8::run();
 	auto end = chrono::system_clock::now();
 	chrono::duration<double> elapsed_time = end - start;
