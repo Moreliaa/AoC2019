@@ -10,19 +10,21 @@ class Day10 {
 	}
 
 	static bool checkDir(map<string, string> &field, unsigned x, unsigned y, unsigned x1, unsigned y1, unsigned stepSizeX, unsigned stepSizeY) {
-		unsigned greaterX = max(x, x1);
-		unsigned lesserX = min(x, x1);
-		unsigned greaterY = max(y, y1);
-		unsigned lesserY = min(y, y1);
-		lesserX += stepSizeX;
-		lesserY += stepSizeY;
+		int xSign = (x < x1) ? 1 : -1;
+		int ySign = (y < y1) ? 1 : -1;
+		int xNext = x + xSign * stepSizeX;
+		int yNext = y + ySign * stepSizeY;
+		int xMin = min(x, x1);
+		int xMax = max(x, x1);
+		int yMin = min(y, y1);
+		int yMax = max(y, y1);
 
-		while ((lesserX < greaterX && stepSizeX != 0) || (lesserY < greaterY && stepSizeY != 0))
+		while ((xNext > xMin && xNext < xMax && stepSizeX != 0) || (yNext > yMin && yNext < yMax && stepSizeY != 0))
 		{
-			if (field[createKey(lesserX, lesserY)] == "#")
+			if (field[createKey(xNext, yNext)] == "#")
 				return false;
-			lesserX += stepSizeX;
-			lesserY += stepSizeY;
+			xNext = xNext + xSign * stepSizeX;
+			yNext = yNext + ySign * stepSizeY;
 		}
 		return true;
 	}
