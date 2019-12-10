@@ -28,10 +28,16 @@ class Day10 {
 	}
 
 	static void reduce(unsigned &greater, unsigned &lesser) {
-		if (greater % lesser == 0) {
-			greater /= lesser;
-			lesser = 1;
+		unsigned next = greater;
+		unsigned ggt = lesser;
+		unsigned nextop = next % ggt;
+		while (nextop != 0) {
+			next = ggt;
+			ggt = nextop;
+			nextop = next % ggt;
 		}
+		greater /= ggt;
+		lesser /= ggt;
 	}
 
 	static bool checkLos(map<string, string> &field, unsigned x, unsigned y, unsigned x1, unsigned y1) {
@@ -114,7 +120,7 @@ public:
 		}
 		unsigned width = fileContent[0].length();
 		unsigned height = j;
-		mapLos(field, losCount, width, height, "5,8");
+		mapLos(field, losCount, width, height, "6,3");
 		int maximum = 0;
 		string maxKey = "";
 		auto it = losCount.begin();
