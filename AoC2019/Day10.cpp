@@ -143,7 +143,7 @@ public:
 		}
 		unsigned width = fileContent[0].length();
 		unsigned height = j;
-		//mapLos(field, losCount, width, height);
+		mapLos(field, losCount, width, height);
 		int maximum = 0;
 		string maxKey = "";
 		auto it = losCount.begin();
@@ -155,6 +155,8 @@ public:
 			it++;
 		} while (it != losCount.end());
 		cout << maxKey << " -> Max: " << maximum << endl;
+
+		// Pt1 result x,y
 		int x = 19;
 		int y = 11;
 		map<string, Point> &slopeMap = mapSlopeAndLosForAst(field, losCount, width, height, x, y, "19,11");
@@ -167,28 +169,20 @@ public:
 			it2++;
 		} while (it2 != slopeMap.end());
 
-		int count = 0;
 		auto it3 = atanValues.begin();
-		int ast200idx;
+		bool begin = false;
+		int destroyedCount = 0;
 		do {
 			int angle = (int)it3->first;
-			if (angle == -90) {
-				ast200idx = 200 - (atanValues.size() - count);
-				break;
-			}
-			it3++;
-			count++;
-		} while (it3 != atanValues.end());
-
-		count = 0;
-		it3 = atanValues.begin();
-		do {
-			if (count == ast200idx) {
+			if (angle == -90)
+				begin = true;
+			if (begin)
+				destroyedCount++;
+			if (destroyedCount == 200)
 				cout << "Result Pt2: " << it3->second << endl;
-			}
-			
 			it3++;
-			count++;
-		} while (it3 != atanValues.end());
+			if (it3 == atanValues.end())
+				it3 = atanValues.begin();
+		} while (destroyedCount < 200);
 	}
 };
