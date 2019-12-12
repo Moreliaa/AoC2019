@@ -9,30 +9,28 @@ class Day10 {
 		return to_string(x) + "," + to_string(y);
 	}
 
-	static bool checkDir(map<string, string> &field, unsigned x, unsigned y, unsigned x1, unsigned y1, unsigned stepSizeX, unsigned stepSizeY) {
-		int xSign = (x < x1) ? 1 : -1;
-		int ySign = (y < y1) ? 1 : -1;
-		int xNext = x + xSign * stepSizeX;
-		int yNext = y + ySign * stepSizeY;
-		int xMin = min(x, x1);
-		int xMax = max(x, x1);
-		int yMin = min(y, y1);
-		int yMax = max(y, y1);
+	static bool checkDir(map<string, string> &field, unsigned x1, unsigned y1, unsigned x2, unsigned y2, int stepX, int stepY) {
+		int xNext = x1 + stepX;
+		int yNext = y1 + stepY;
+		int xMin = min(x1, x2);
+		int xMax = max(x1, x2);
+		int yMin = min(y1, y2);
+		int yMax = max(y1, y2);
 
-		while ((xNext > xMin && xNext < xMax && stepSizeX != 0) || (yNext > yMin && yNext < yMax && stepSizeY != 0))
+		while ((xNext > xMin && xNext < xMax && stepX != 0) || (yNext > yMin && yNext < yMax && stepY != 0))
 		{
 			if (field[createKey(xNext, yNext)] == "#")
 				return false;
-			xNext = xNext + xSign * stepSizeX;
-			yNext = yNext + ySign * stepSizeY;
+			xNext = xNext + stepX;
+			yNext = yNext + stepY;
 		}
 		return true;
 	}
 
-	static void reduce(unsigned &greater, unsigned &lesser) {
-		unsigned next = greater;
-		unsigned ggt = lesser;
-		unsigned nextop = next % ggt;
+	static void reduce(int &greater, int &lesser) {
+		int next = abs(greater);
+		int ggt = abs(lesser);
+		int nextop = next % ggt;
 		while (nextop != 0) {
 			next = ggt;
 			ggt = nextop;
@@ -42,16 +40,18 @@ class Day10 {
 		lesser /= ggt;
 	}
 
-	static bool checkLos(map<string, string> &field, unsigned x, unsigned y, unsigned x1, unsigned y1) {
-			unsigned stepX = x > x1 ? x - x1 : x1 - x;
-			unsigned stepY = y > y1 ? y - y1 : y1 - y;
+	static bool checkLos(map<string, string> &field, unsigned x1, unsigned y1, unsigned x2, unsigned y2) {
+			int stepX = x2 - x1;
+			int stepY = y2 - y1;
+			if (stepY > 1 && stepX < -1)
+				int a = 0;
 			if (stepX == 0)
-				stepY = 1;
+				stepY /= abs(stepY);
 			else if (stepY == 0)
-				stepX = 1;
+				stepX /= abs(stepX);
 			else
-				stepX > stepY ? reduce(stepX, stepY) : reduce(stepY, stepX);
-			return checkDir(field, x, y, x1, y1, stepX, stepY);
+				abs(stepX) > abs(stepY) ? reduce(stepX, stepY) : reduce(stepY, stepX);
+			return checkDir(field, x1, y1, x2, y2, stepX, stepY);
 	}
 
 	static void mapLosForAst(map<string, string> &field, map<string, int> &losCount, unsigned width, unsigned height, unsigned x, unsigned y, string printTarget) {
@@ -134,5 +134,6 @@ public:
 			it++;
 		} while (it != losCount.end());
 		cout << maxKey << " -> Max: " << maximum << endl;
+		// 19, 11
 	}
 };
