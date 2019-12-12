@@ -164,6 +164,7 @@
     <ClCompile Include="AoC2019.cpp" />
     <ClCompile Include="Day1.cpp" />
     <ClCompile Include="Day10.cpp" />
+    <ClCompile Include="Day11.cpp" />
     <ClCompile Include="Day2.cpp" />
     <ClCompile Include="Day3.cpp" />
     <ClCompile Include="Day4.cpp" />
@@ -179,6 +180,7 @@
   <ItemGroup>
     <Text Include="input\Day1.txt" />
     <Text Include="input\Day10.txt" />
+    <Text Include="input\Day11.txt" />
     <Text Include="input\Day2.txt" />
     <Text Include="input\Day3.txt" />
     <Text Include="input\Day5.txt" />

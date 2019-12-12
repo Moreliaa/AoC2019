@@ -165,7 +165,7 @@ public:
 		map<long long, long long> input;
 		long long idx = 0;
 		for each (string number in inputAsString) {
-			input[idx] = stoi(number, nullptr, 10);
+			input[idx] = stoll(number, nullptr, 10);
 			idx++;
 		}
 		return input;
