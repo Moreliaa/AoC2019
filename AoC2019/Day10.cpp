@@ -162,7 +162,7 @@ public:
 		auto it2 = slopeMap.begin();
 		do {
 			Point p = it2->second;
-			double atan = atan2(p.x, p.y) * 180 / 3.141592653;
+			double atan = atan2(p.y, p.x) * 180 / 3.141592653;
 			atanValues[atan] = it2->first;
 			it2++;
 		} while (it2 != slopeMap.end());
@@ -172,8 +172,8 @@ public:
 		int ast200idx;
 		do {
 			int angle = (int)it3->first;
-			if (angle == 90) {
-				ast200idx = (atanValues.size() + count) % atanValues.size();
+			if (angle == -90) {
+				ast200idx = 200 - (atanValues.size() - count);
 				break;
 			}
 			it3++;
