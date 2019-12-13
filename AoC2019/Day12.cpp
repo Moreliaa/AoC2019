@@ -5,12 +5,6 @@
 
 class Day12 {
 	class Moon {
-		long long x, y, z, x_v, y_v, z_v;
-		long long x_init, y_init, z_init;
-		map<long long, long long> x_wave;
-		map<long long, long long> y_wave;
-		map<long long, long long> z_wave;
-
 		void gravityAxis(const long long &axis, const long long &partnerAxis, long long &velocityOnAxis) {
 			if (axis > partnerAxis)
 				velocityOnAxis--;
@@ -27,8 +21,8 @@ class Day12 {
 		}
 
 	public:
-		bool repeated = false;
-		long long stepsToRepetition = 0;
+		long long x, y, z, x_v, y_v, z_v;
+		long long x_init, y_init, z_init;
 
 		Moon(long long x, long long y, long long z) {
 			this->x = x;
@@ -50,26 +44,6 @@ class Day12 {
 			x += x_v;
 			y += y_v;
 			z += z_v;
-		}
-
-		bool putStateAxis(map<long long, long long> &wave, long long &axis, long long &axis_v) {
-			auto search = wave.find(axis);
-			if (search == wave.end()) {
-				wave[axis] = axis_v;
-				return false;
-			}
-			return search->second == axis_v;
-		}
-
-		void putState() {
-			if (repeated)
-				return;
-			bool a = putStateAxis(x_wave, x, x_v);
-			bool b = putStateAxis(y_wave, y, y_v);
-			bool c = putStateAxis(z_wave, z, z_v);
-			repeated = a && b && c;
-			if (repeated)
-				cout << "lel";
 		}
 
 		long long calcEtotal() {
@@ -134,23 +108,45 @@ class Day12 {
 		}
 	}
 
-	static void stepUntilRepeat(vector<Moon> &moons) {
+	static vector<long long> stepUntilRepeat(vector<Moon> &moons) {
 		long long steps = 0;
-		bool isInitial = false;
-		while (!isInitial) {
-			isInitial = true;
-			auto it = moons.begin();
-			while (it != moons.end()) {
-				it->putState();
-				if (!it->repeated)
-					isInitial = false;
-				else if (it->stepsToRepetition == 0)
-					it->stepsToRepetition = steps;
-				it++;
-			}
+		long long stepsX = 0;
+		long long stepsY = 0;
+		long long stepsZ = 0;
+
+		unsigned initX = 0;
+		unsigned initY = 0;
+		unsigned initZ = 0;
+
+		while (stepsX == 0 || stepsY == 0 || stepsZ == 0) {
 			step(moons);
 			steps++;
+
+			auto it = moons.begin();
+			while (it != moons.end()) {
+				if (it->x == it->x_init && it->x_v == 0)
+					initX++;
+				if (it->y == it->y_init && it->y_v == 0)
+					initY++;
+				if (it->z == it->z_init && it->z_v == 0)
+					initZ++;
+				it++;
+			}
+			if (stepsX == 0 && initX == moons.size())
+				stepsX = steps;
+			if (stepsY == 0 && initY == moons.size())
+				stepsY = steps;
+			if (stepsZ == 0 && initZ == moons.size())
+				stepsZ = steps;
+			initX = 0;
+			initY = 0;
+			initZ = 0;
 		}
+		vector<long long> coords;
+		coords.push_back(stepsX);
+		coords.push_back(stepsY);
+		coords.push_back(stepsZ);
+		return coords;
 	}
 
 	static long long kgv(long long a, long long b) {
@@ -162,30 +158,16 @@ class Day12 {
 		return result;
 	}
 
-	static vector<long long> nextSteps(vector<long long> &steps) {
+	static vector<long long> getKgvForSteps(vector<long long> &steps) {
 		vector<long long> next;
 		auto it = steps.begin();
 		for (unsigned i = 0; i < steps.size() - 1; i++)
 		{
 			long long a = steps[i];
-			long long b = steps[i+1];
+			long long b = steps[i + 1];
 			next.push_back(kgv(a, b));
 		}
 		return next;
-	}
-
-	static long long kgvOfSteps(vector<Moon> &moons) {
-		vector<long long> steps;
-		auto itm = moons.begin();
-		while (itm != moons.end()) {
-			steps.push_back(itm->stepsToRepetition);
-			itm++;
-		}
-		while (steps.size() > 1) {
-			steps = nextSteps(steps);
-		}
-		return steps[0];
-
 	}
 
 	static long long calcEtotal(vector<Moon> &moons) {
@@ -212,7 +194,9 @@ public:
 			it->reset();
 			it++;
 		}
-		stepUntilRepeat(moons);
-		cout << "Pt2: " << kgvOfSteps(moons) << endl;
+		auto stepsForEachCoord = stepUntilRepeat(moons);
+		while (stepsForEachCoord.size() > 1)
+			stepsForEachCoord = getKgvForSteps(stepsForEachCoord);
+		cout << "Pt2: " << stepsForEachCoord[0] << endl;
 	}
 };
