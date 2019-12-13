@@ -1,30 +1,42 @@
 #include "stdafx.h"
 #include "Utilities.cpp"
+#include <map>
+#include <algorithm>
 
 class Day12 {
 	class Moon {
-		int x, y, z, x_v, y_v, z_v;
+		long long x, y, z, x_v, y_v, z_v;
+		long long x_init, y_init, z_init;
+		map<long long, long long> x_wave;
+		map<long long, long long> y_wave;
+		map<long long, long long> z_wave;
 
-		void gravityAxis(const int axis, const int partnerAxis, int &velocityOnAxis) {
+		void gravityAxis(const long long &axis, const long long &partnerAxis, long long &velocityOnAxis) {
 			if (axis > partnerAxis)
 				velocityOnAxis--;
 			else if (axis < partnerAxis)
 				velocityOnAxis++;
 		}
 
-		int calcEpot() {
+		long long calcEpot() {
 			return abs(x) + abs(y) + abs(z);
 		}
 
-		int calcEkin() {
+		long long calcEkin() {
 			return abs(x_v) + abs(y_v) + abs(z_v);
 		}
 
 	public:
-		Moon(int x, int y, int z) {
+		bool repeated = false;
+		long long stepsToRepetition = 0;
+
+		Moon(long long x, long long y, long long z) {
 			this->x = x;
 			this->y = y;
 			this->z = z;
+			this->x_init = x;
+			this->y_init = y;
+			this->z_init = z;
 			this->x_v = 0;
 			this->y_v = 0;
 			this->z_v = 0;
@@ -40,8 +52,40 @@ class Day12 {
 			z += z_v;
 		}
 
-		int calcEtotal() {
+		bool putStateAxis(map<long long, long long> &wave, long long &axis, long long &axis_v) {
+			auto search = wave.find(axis);
+			if (search == wave.end()) {
+				wave[axis] = axis_v;
+				return false;
+			}
+			return search->second == axis_v;
+		}
+
+		void putState() {
+			if (repeated)
+				return;
+			bool a = putStateAxis(x_wave, x, x_v);
+			bool b = putStateAxis(y_wave, y, y_v);
+			bool c = putStateAxis(z_wave, z, z_v);
+			repeated = a && b && c;
+			if (repeated)
+				cout << "lel";
+		}
+
+		long long calcEtotal() {
 			return calcEpot() * calcEkin();
+		}
+		bool isInitialState() {
+			return x == x_init && y == y_init && z == z_init && x_v == 0 && y_v == 0 && z_v == 0;
+		}
+
+		void reset() {
+			this->x = x_init;
+			this->y = y_init;
+			this->z = z_init;
+			this->x_v = 0;
+			this->y_v = 0;
+			this->z_v = 0;
 		}
 
 		void printDebugInfo() {
@@ -83,17 +127,69 @@ class Day12 {
 		}
 	}
 
-	static void stepNtimes(vector<Moon> &moons, int steps) {
+	static void stepNtimes(vector<Moon> &moons, int steps, bool debug=false) {
 		while (steps > 0) {
-			cout << "*";
-			step(moons);
+			step(moons, debug);
 			steps--;
 		}
-		cout << endl;
 	}
 
-	static int calcEtotal(vector<Moon> &moons) {
-		int sum = 0;
+	static void stepUntilRepeat(vector<Moon> &moons) {
+		long long steps = 0;
+		bool isInitial = false;
+		while (!isInitial) {
+			isInitial = true;
+			auto it = moons.begin();
+			while (it != moons.end()) {
+				it->putState();
+				if (!it->repeated)
+					isInitial = false;
+				else if (it->stepsToRepetition == 0)
+					it->stepsToRepetition = steps;
+				it++;
+			}
+			step(moons);
+			steps++;
+		}
+	}
+
+	static long long kgv(long long a, long long b) {
+		long long small = min(a, b);
+		long long large = max(a, b);
+		long long result = small;
+		while (result % large != 0)
+			result += small;
+		return result;
+	}
+
+	static vector<long long> nextSteps(vector<long long> &steps) {
+		vector<long long> next;
+		auto it = steps.begin();
+		for (unsigned i = 0; i < steps.size() - 1; i++)
+		{
+			long long a = steps[i];
+			long long b = steps[i+1];
+			next.push_back(kgv(a, b));
+		}
+		return next;
+	}
+
+	static long long kgvOfSteps(vector<Moon> &moons) {
+		vector<long long> steps;
+		auto itm = moons.begin();
+		while (itm != moons.end()) {
+			steps.push_back(itm->stepsToRepetition);
+			itm++;
+		}
+		while (steps.size() > 1) {
+			steps = nextSteps(steps);
+		}
+		return steps[0];
+
+	}
+
+	static long long calcEtotal(vector<Moon> &moons) {
+		long long sum = 0;
 		auto it = moons.begin();
 		while (it != moons.end()) {
 			sum += it->calcEtotal();
@@ -111,6 +207,12 @@ public:
 		moons.push_back(Moon(-13, 2, 10));
 		stepNtimes(moons, 1000);
 		cout << "Pt1: " << calcEtotal(moons) << endl;
-		
+		auto it = moons.begin();
+		while (it != moons.end()) {
+			it->reset();
+			it++;
+		}
+		stepUntilRepeat(moons);
+		cout << "Pt2: " << kgvOfSteps(moons) << endl;
 	}
 };
