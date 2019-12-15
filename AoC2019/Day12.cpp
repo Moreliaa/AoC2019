@@ -183,10 +183,10 @@ class Day12 {
 public:
 	static void run() {
 		vector<Moon> moons;
-		moons.push_back(Moon(5, 4, 4));
-		moons.push_back(Moon(-11, -11, -3));
-		moons.push_back(Moon(0, 7, 0));
-		moons.push_back(Moon(-13, 2, 10));
+		moons.push_back(Moon(-8, -10, 0));
+		moons.push_back(Moon(5, 5, 10));
+		moons.push_back(Moon(2, -7, 3));
+		moons.push_back(Moon(9, -8, -3));
 		stepNtimes(moons, 1000);
 		cout << "Pt1: " << calcEtotal(moons) << endl;
 		auto it = moons.begin();

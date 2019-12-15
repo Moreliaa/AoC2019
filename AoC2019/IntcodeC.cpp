@@ -8,6 +8,7 @@ public:
 	map<long long, long long> *input;
 	long long idx;
 	long long relative_base;
+	bool nextInputAvailable = false;
 
 	IntcodeProgram() {
 		this->idx = 0;
@@ -77,7 +78,7 @@ class IntcodeC {
 		return opcode;
 	}
 
-	static bool handleOpcode(IntcodeProgram &prog, istream &s_in, ostream &s_out, bool haltOnOutput=false) {
+	static bool handleOpcode(IntcodeProgram &prog, istream &s_in, ostream &s_out, bool haltOnOutput=false, bool haltOnInput=false) {
 		auto &input = *prog.input;
 		long long &idx = prog.idx;
 		vector<int> command = extractCommand(input[idx]);
@@ -103,11 +104,16 @@ class IntcodeC {
 				s_in >> userInput;
 			}
 			else {
+				if (haltOnInput && !prog.nextInputAvailable)
+					return true;
 				string line;
 				getline(s_in, line);
+				if (line == "")
+					throw;
 				userInput = stoi(line, nullptr, 10);
 			}
 			input[resolveParam(prog, command, idx, 1)] = userInput;
+			prog.nextInputAvailable = false;
 			idx = idx + 2;
 			return false;
 		case 4: // outputs
@@ -142,17 +148,17 @@ class IntcodeC {
 		}
 	}
 public:
-	static long long runProgram(IntcodeProgram &prog, istream &s_in, ostream &s_out, bool haltOnOutput=false) {
+	static long long runProgram(IntcodeProgram &prog, istream &s_in, ostream &s_out, bool haltOnOutput=false, bool haltOnInput=false) {
 		bool halt;
 		do {
-			halt = handleOpcode(prog, s_in, s_out, haltOnOutput);
+			halt = handleOpcode(prog, s_in, s_out, haltOnOutput, haltOnInput);
 		} while (!halt);
 		return peekOpcode(prog);
 	}
 
-	static long long runProgram(map<long long, long long> &input, istream &s_in, ostream &s_out, bool haltOnOutput=false) {
+	static long long runProgram(map<long long, long long> &input, istream &s_in, ostream &s_out, bool haltOnOutput=false, bool haltOnInput=false) {
 		IntcodeProgram prog(input);
-		return runProgram(prog, s_in, s_out, haltOnOutput);
+		return runProgram(prog, s_in, s_out, haltOnOutput, haltOnInput);
 	}
 
 	static map<long long, long long> getInput(string filenameOrString, bool interpretAsString=false) {	
