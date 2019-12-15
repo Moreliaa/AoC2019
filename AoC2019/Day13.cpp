@@ -19,10 +19,9 @@ class Day13 {
 		stringstream s_in;
 		stringstream s_out;
 		int blocks;
-		int score = 0;
+		int score = -1;
 		Point ballPos;
 		Point paddlePos;
-		bool done = false;
 
 		Game(map<long long, long long> &input) {
 			this->gamelogic = IntcodeProgram(input);
@@ -42,24 +41,25 @@ class Day13 {
 			gamelogic.nextInputAvailable = true;
 		}
 
-		void updateState() {
+		void updateState(stringstream &out) {
 			string x, y, tile;
 			int x_i;
 			int y_i;
 			int tile_i;
-			blocks = 0;
+			int newblocks = -1;
 			do {
-				getline(s_out, x);
-				if (x == "")
+				getline(out, x);
+				if (x == "") {					
 					break;
-				getline(s_out, y);
-				getline(s_out, tile);
+				}
+				getline(out, y);
+				getline(out, tile);
 				x_i = stoi(x);
 				y_i = stoi(y);
 				tile_i = stoi(tile);
 
 				if ((tiles)tile_i == block) {
-					blocks++;
+					newblocks++;
 				} else if ((tiles)tile_i == ball) {
 					ballPos.x = x_i;
 					ballPos.y = y_i;
@@ -73,13 +73,14 @@ class Day13 {
 				else
 					screen[getKey(x_i, y_i)] = (tiles)tile_i;
 			} while (true);
-			if (blocks = 0)
-				done = true;
+			if (newblocks != -1)
+				blocks = newblocks + 1;
 		}
 
 		long long run() {
-			long long returnCode = IntcodeC::runProgram(gamelogic, s_in, s_out, false, true);
-			updateState();
+			stringstream out;
+			long long returnCode = IntcodeC::runProgram(gamelogic, s_in, out, false, true);
+			updateState(out);
 			sendNextInput();
 			return returnCode;
 		}
@@ -98,7 +99,7 @@ public:
 		long long rc;
 		do {
 			rc = game2.run();
-		} while (rc != 99 && !game2.done);
+		} while (rc != 99);
 
 		cout << "Pt2 - Remaining blocks: " << game2.blocks << " Score: " << game2.score << endl;
 	}
