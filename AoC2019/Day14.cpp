@@ -58,7 +58,7 @@ class Day14 {
 		return reactions;
 	}
 
-	static Reaction findReactionByOutput(vector<Reaction> reactions, string name) {
+	static Reaction findReactionByOutput(vector<Reaction> &reactions, string name) {
 		for (unsigned i = 0; i < reactions.size(); i++)
 		{
 			if (reactions[i].output.name == name)
@@ -86,11 +86,8 @@ class Day14 {
 		while (numberOfReactionsNeeded * currentReaction.output.count < numOutputRequired)
 			numberOfReactionsNeeded++;
 
-		int excessAmount = 0;
 		int totalOutput = numberOfReactionsNeeded * currentReaction.output.count;
-		while ((totalOutput - excessAmount) % numOutputRequired != 0) {
-			excessAmount++;
-		}
+		int excessAmount = totalOutput - numOutputRequired;
 		excess[currentReaction.output.name] += excessAmount;
 
 		int total = 0;
