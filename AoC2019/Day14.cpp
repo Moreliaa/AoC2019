@@ -21,7 +21,6 @@ class Day14 {
 	public:
 		vector<Reagent> reagents;
 		Reagent output;
-		int excess = 0;
 
 		Reaction() {
 
@@ -70,44 +69,40 @@ class Day14 {
 		throw;
 	}
 
-	static int getRequiredOutput(Reaction &current, Reaction &next, Reagent &currentReagent, int numOutputRequired) {
-		while (numOutputRequired != 0 && next.excess != 0) {
-			numOutputRequired--;
-			next.excess--;
-		}
-		int outputReq = numOutputRequired * currentReagent.count;
-		
-		int outputProduced = next.output.count;
-		if (outputReq % outputProduced != 0) {
-			current.excess += (outputReq % outputProduced);
-			outputReq = (outputReq / outputProduced) + 1;
-		}
-		else
-			outputReq /= outputProduced;
-		return outputReq;
-	}
+	static int addReagents(map<string, int> &excess, vector<Reaction> &reactions, Reaction &currentReaction, int numOutputRequired) {
+		auto s = excess.find(currentReaction.output.name);
+		if (s == excess.end())
+			excess[currentReaction.output.name] = 0;
 
-	static int addReagents(map<string, Reaction> &excess, vector<Reaction> &reactions, Reaction &currentReaction, int numOutputRequired) {
-		if (currentReaction.reagents.size() == 1 && currentReaction.reagents[0].name == "ORE") {
-			while (numOutputRequired != 0 && currentReaction.excess != 0) {
-				numOutputRequired--;
-				currentReaction.excess--;
-			}
-			int outputReq = numOutputRequired * currentReaction.reagents[0].count;
-			int outputProduced = currentReaction.output.count;
-			if (outputReq % outputProduced != 0) {
-				currentReaction.excess += (outputReq % outputProduced);
-				outputReq = (outputReq / outputProduced) + 1;
-			}
-			else
-				outputReq /= outputProduced;
-			return numOutputRequired * currentReaction.reagents[0].count;
+		while (numOutputRequired > 0 && excess[currentReaction.output.name] > 0) {
+			numOutputRequired--;
+			excess[currentReaction.output.name]--;
 		}
+
+		if (numOutputRequired == 0)
+			return 0;
+
+		int numberOfReactionsNeeded = 0;
+		while (numberOfReactionsNeeded * currentReaction.output.count < numOutputRequired)
+			numberOfReactionsNeeded++;
+
+		int excessAmount = 0;
+		int totalOutput = numberOfReactionsNeeded * currentReaction.output.count;
+		while ((totalOutput - excessAmount) % numOutputRequired != 0) {
+			excessAmount++;
+		}
+		excess[currentReaction.output.name] += excessAmount;
+
 		int total = 0;
 		for each(Reagent reagent in currentReaction.reagents) {
-			Reaction &nextReaction = findReactionByOutput(reactions, reagent.name);
-			int outputReq = getRequiredOutput(currentReaction, nextReaction, reagent, numOutputRequired);
-			total += addReagents(excess, reactions, nextReaction, outputReq);
+			int outputReq = numberOfReactionsNeeded * reagent.count;
+			if (reagent.name == "ORE") {
+				total += outputReq;
+			}
+			else {
+				Reaction &nextReaction = findReactionByOutput(reactions, reagent.name);
+				total += addReagents(excess, reactions, nextReaction, outputReq);
+			}
 		}
 		return total;
 	}
@@ -117,8 +112,9 @@ public:
 		auto input = Utilities::readFile("input/Day14.txt");
 		vector<Reaction> reactions = getReactions(input);
 		Reaction &fuelR = findReactionByOutput(reactions, "FUEL");
-		map<string, Reaction> excess;
+		map<string, int> excess;
 
 		int ore = addReagents(excess, reactions, fuelR, 1);
+		cout << "Ore: " << ore << endl;
 	}
 };
