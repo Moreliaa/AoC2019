@@ -5,6 +5,7 @@
 #include <functional> 
 #include <cctype>
 #include <locale>
+#include <map>
 
 class Utilities {
 public:
@@ -73,5 +74,38 @@ public:
 	}
 	int calcManhattan() {
 		return abs(this->x) + abs(this->y);
+	}
+};
+
+template <class T>
+class Grid {
+public:
+	map<string, T> grid;
+
+	Grid<T>() {
+		this->grid = map<string, T>();
+	}
+
+	static string createKey(long long x, long long y) {
+		return to_string(x) + "," + to_string(y);
+	}
+
+	static Point parsePos(string key) {
+		vector<string> xy = Utilities::splitString(key, ",");
+		Point p = Point(stoi(xy[0]), stoi(xy[1]));
+		return p;
+	}
+
+	bool seenPos(long long x, long long y) {
+		auto it = grid.find(createKey(x, y));
+		return it != grid.end();
+	}
+
+	T& get(long long x, long long y) {
+		return grid[createKey(x, y)];
+	}
+
+	void put(long long x, long long y, T val) {
+		grid[createKey(x, y)] = val;
 	}
 };

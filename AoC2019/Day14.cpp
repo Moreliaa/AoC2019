@@ -116,7 +116,7 @@ public:
 		long long maxRange = 10000000000;
 		long long minRange = 1;
 		long long next = 500000;
-		map<int, int> attempts;
+		map<long long, int> attempts;
 		auto it = attempts.find(next);
 		do  {
 			attempts[next] = 1;
