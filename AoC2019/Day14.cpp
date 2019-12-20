@@ -6,12 +6,12 @@
 class Day14 {
 	class Reagent {
 	public:
-		int count;
+		long long count;
 		string name;
 		Reagent() {
 
 		}
-		Reagent(int count, string name) {
+		Reagent(long long count, string name) {
 			this->count = count;
 			this->name = name;
 		}
@@ -69,7 +69,7 @@ class Day14 {
 		throw;
 	}
 
-	static int addReagents(map<string, int> &excess, vector<Reaction> &reactions, Reaction &currentReaction, int numOutputRequired) {
+	static long long addReagents(map<string, long long> &excess, vector<Reaction> &reactions, Reaction &currentReaction, long long numOutputRequired) {
 		auto s = excess.find(currentReaction.output.name);
 		if (s == excess.end())
 			excess[currentReaction.output.name] = 0;
@@ -82,17 +82,16 @@ class Day14 {
 		if (numOutputRequired == 0)
 			return 0;
 
-		int numberOfReactionsNeeded = 0;
-		while (numberOfReactionsNeeded * currentReaction.output.count < numOutputRequired)
-			numberOfReactionsNeeded++;
+		long long added = numOutputRequired % currentReaction.output.count != 0 ? 1 : 0;
+		long long numberOfReactionsNeeded = (numOutputRequired / currentReaction.output.count) + added;
 
-		int totalOutput = numberOfReactionsNeeded * currentReaction.output.count;
-		int excessAmount = totalOutput - numOutputRequired;
+		long long totalOutput = numberOfReactionsNeeded * currentReaction.output.count;
+		long long excessAmount = totalOutput - numOutputRequired;
 		excess[currentReaction.output.name] += excessAmount;
 
-		int total = 0;
+		long long total = 0;
 		for each(Reagent reagent in currentReaction.reagents) {
-			int outputReq = numberOfReactionsNeeded * reagent.count;
+			long long outputReq = numberOfReactionsNeeded * reagent.count;
 			if (reagent.name == "ORE") {
 				total += outputReq;
 			}
@@ -109,9 +108,31 @@ public:
 		auto input = Utilities::readFile("input/Day14.txt");
 		vector<Reaction> reactions = getReactions(input);
 		Reaction &fuelR = findReactionByOutput(reactions, "FUEL");
-		map<string, int> excess;
-
-		int ore = addReagents(excess, reactions, fuelR, 1);
+		map<string, long long> excess;
+		long long ore = addReagents(excess, reactions, fuelR, 1);
 		cout << "Ore: " << ore << endl;
+		
+		long long targetOre = 1000000000000;
+		long long maxRange = 10000000000;
+		long long minRange = 1;
+		long long next = 500000;
+		map<long long, int> attempts;
+		auto it = attempts.find(next);
+		do  {
+			attempts[next] = 1;
+			map<string, long long> excess1;
+			ore = addReagents(excess1, reactions, fuelR, next);
+			cout << "Min: " << minRange << " Max: " << maxRange << " Ore: " << ore << " Fuel: " << next << endl;
+			if (ore > targetOre) {
+				maxRange = next;
+				next = (next + minRange) / 2;
+			}
+			else if (ore < targetOre) {
+				minRange = next;
+				next = (maxRange + next) / 2;
+			}
+			it = attempts.find(next);
+		} while (it == attempts.end());
+		cout << "Final fuel: " << next << endl;
 	}
 };
