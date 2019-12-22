@@ -81,8 +81,16 @@ template <class T>
 class Grid {
 public:
 	map<string, T> grid;
+	long long xMin = 0;
+	long long xMax = 0;
+	long long yMin = 0;
+	long long yMax = 0;
 
 	Grid<T>() {
+		this->grid = map<string, T>();
+	}
+
+	void reset() {
 		this->grid = map<string, T>();
 	}
 
@@ -107,5 +115,9 @@ public:
 
 	void put(long long x, long long y, T val) {
 		grid[createKey(x, y)] = val;
+		xMin = min(xMin, x);
+		xMax = max(xMax, x);
+		yMin = min(yMin, y);
+		yMax = max(yMax, y);
 	}
 };

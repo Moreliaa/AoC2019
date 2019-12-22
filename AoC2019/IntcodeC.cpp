@@ -5,7 +5,7 @@
 
 class IntcodeProgram {
 public:
-	map<long long, long long> *input;
+	map<long long, long long> input;
 	long long idx;
 	long long relative_base;
 	bool nextInputAvailable = false;
@@ -15,8 +15,8 @@ public:
 		this->relative_base = 0;
 	}
 
-	IntcodeProgram(map<long long, long long> &input) {
-		this->input = &input;
+	IntcodeProgram(map<long long, long long> input) {
+		this->input = input;
 		this->idx = 0;
 		this->relative_base = 0;
 	}
@@ -32,7 +32,7 @@ class IntcodeC {
 	}
 
 	static long long resolveParam(IntcodeProgram &prog, vector<int> &command, long long param, unsigned digit_idx) {
-		auto &input = *prog.input;
+		auto &input = prog.input;
 		int param_mode = command.size() >= 2 + digit_idx ? command[command.size() - 2 - digit_idx] : 0;
 		long long param_idx = param + digit_idx;
 		switch (param_mode) {
@@ -67,7 +67,7 @@ class IntcodeC {
 	}
 
 	static long long peekOpcode(IntcodeProgram &prog) {
-		auto &input = *prog.input;
+		auto &input = prog.input;
 		long long &idx = prog.idx;
 		auto command = extractCommand(getValue(input, idx));
 		int opcode;
@@ -79,7 +79,7 @@ class IntcodeC {
 	}
 
 	static bool handleOpcode(IntcodeProgram &prog, istream &s_in, ostream &s_out, bool haltOnOutput=false, bool haltOnInput=false) {
-		auto &input = *prog.input;
+		auto &input = prog.input;
 		long long &idx = prog.idx;
 		vector<int> command = extractCommand(input[idx]);
 		int opcode;
