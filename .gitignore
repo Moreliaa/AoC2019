@@ -5,6 +5,8 @@
 /Debug/*
 /AoC2019/Debug/*
 /AoC2019.VC.VC.opendb
+/x64/*
+/AoC2019/x64/*
 *.suo
 *.db
 *.opendb
@@ -13,7 +15,6 @@
 *.obj
 *.lastbuildstate
 *.tlog
-*.txt
 *.idb
 *.pdb
 *.exe
