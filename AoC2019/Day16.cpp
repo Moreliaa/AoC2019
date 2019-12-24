@@ -9,6 +9,7 @@ class Day16 {
 		int repeatIdx;
 		int patternIdx;
 		const int pattern[4] = { 0, 1, 0, -1 };
+		bool patternsLooped = false;
 		
 		for (auto digit = 0; digit < input.size(); digit++) {
 			int acc = 0;
@@ -44,16 +45,59 @@ public:
 			input_i.push_back(b);
 		}
 
+		auto inputCopy(input_i);
+
 		int counter = 0;
 		while (counter < 100) {
-			input_i = calcPhase(input_i);
+			inputCopy = calcPhase(inputCopy);
 			counter++;
 		}
-		cout << "Result: ";
+		cout << "Result Pt1: ";
 		for (auto i = 0; i < 8; i++) {
-			cout << input_i[i];
+			cout << inputCopy[i];
 		}
 		cout << endl;
 
+		int offset = stoi(input[0].substr(0, 7));
+
+		cout << "Offset: " << offset << endl;
+
+		inputCopy = vector<int>(input_i);
+		int idxInList = offset % inputCopy.size();
+		int factor = (inputCopy.size() * 10000 - (offset - idxInList)) / inputCopy.size();
+		if ((inputCopy.size() * 10000 - (offset - idxInList)) % input[0].size() != 0)
+			throw;
+		vector<int> bigInput;
+		bigInput.reserve(inputCopy.size() * factor + 1);
+		for (int i = idxInList; i < inputCopy.size() && factor > 0; i++)
+		{
+			bigInput.push_back(inputCopy[i]);
+			if (i == inputCopy.size() - 1) {
+				factor--;
+				i = -1;
+			}
+		}
+		
+
+		counter = 0;
+		while (counter < 100) {
+			long long sumOfValues = 0;
+			auto it = bigInput.end();
+			do {
+				it--;
+				int d = *it;
+				sumOfValues += d;
+				int newDigit = sumOfValues % 10;
+				*it = newDigit;
+			} while (it != bigInput.begin());
+			counter++;
+		}
+
+
+		cout << "Result Pt2: ";
+		for (auto i = 0; i < 8; i++) {
+			cout << bigInput[i];
+		}
+		cout << endl;
 	}
 };
