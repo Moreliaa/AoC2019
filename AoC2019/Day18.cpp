@@ -12,7 +12,6 @@ class Day18 {
 		char name;
 		map<char, Node*> connectedNodes;
 		map<char, vector<int>> distances;
-		map<char, vector<vector<char>>> reqs;
 
 		Node() {
 			this->name = '.';
@@ -46,18 +45,15 @@ class Day18 {
 
 
 	static bool isInRange(char min, char max, char c) {
-		int ascii_min = stoi(to_string(min));
-		int ascii_max = stoi(to_string(max));
-		int ascii_c = stoi(to_string(c));
-		return ascii_min <= ascii_c && ascii_c <= ascii_max;
+		return min <= c && c <= max;
 	}
 
 	static bool isKey(char c) {
-		return isInRange('a', 'z', c);
+			return isInRange('a', 'z', c);
 	}
 
 	static bool isDoor(char c) {
-		return isInRange('A', 'Z', c);
+			return isInRange('A', 'Z', c);
 	}
 
 	static map<char, Node> getNodes(Grid<char> g, vector<char> &keys) {
@@ -76,19 +72,17 @@ class Day18 {
 		return nodes;
 	}
 
-	static void bfs(Grid<char> &g, Grid<int> seen, Node &origin, Point pos, map<char, Node> &nodes, int steps, vector<char> reqs) {
+	static void bfs(Grid<char> &g, Grid<int> seen, Node &origin, Point pos, map<char, Node> &nodes, int steps) {
 		if (pos.x < g.xMin || pos.x > g.xMax || pos.y < g.yMin || pos.y > g.yMax)
 			return;
 		char c = g.get(pos.x, pos.y);
 		if (c == wall)
 			return;
-		if (isDoor(c))
-			reqs.push_back(c);
-		else if (origin.name != c && (isKey(c) || c == character)) {
+		if (origin.name != c && (isDoor(c) || isKey(c) || c == character)) {
 			Node* target = &nodes[c];
 			origin.connectedNodes[c] = target;
 			origin.distances[c].push_back(steps);
-			origin.reqs[c].push_back(reqs);
+			return;
 		}
 		if (seen.seenPos(pos.x, pos.y) && steps > seen.get(pos.x, pos.y))
 			return;
@@ -96,33 +90,74 @@ class Day18 {
 		seen.put(pos.x, pos.y, steps);
 		steps++;
 
-		bfs(g, seen, origin, Point(pos.x - 1, pos.y), nodes, steps, reqs);
-		bfs(g, seen, origin, Point(pos.x + 1, pos.y), nodes, steps, reqs);
-		bfs(g, seen, origin, Point(pos.x, pos.y - 1), nodes, steps, reqs);
-		bfs(g, seen, origin, Point(pos.x, pos.y + 1), nodes, steps, reqs);
+		bfs(g, seen, origin, Point(pos.x - 1, pos.y), nodes, steps);
+		bfs(g, seen, origin, Point(pos.x + 1, pos.y), nodes, steps);
+		bfs(g, seen, origin, Point(pos.x, pos.y - 1), nodes, steps);
+		bfs(g, seen, origin, Point(pos.x, pos.y + 1), nodes, steps);
 	}
 
 	static void getEdges(Grid<char> &g, map<char, Node> &nodes) {
 		auto it = nodes.begin();
 		while (it != nodes.end()) {
 			Grid<int> seen;
-			vector<char> reqs;
-			bfs(g, seen, it->second, it->second.pos, nodes, 0, reqs);
+			bfs(g, seen, it->second, it->second.pos, nodes, 0);
 			it++;
 		}
 	}
 
-	static void findKeys(Node& currentNode, map<char, int> seen, vector<char> keys, vector<char> missingKeys, int totalSteps, vector<int> &stepsOnFinish) {
-		if (seen[currentNode.name] != 0)
-			return;
-		seen[currentNode.name] = 1;
-		if (isKey(currentNode.name) && find(keys.begin(), keys.end(), currentNode.name) == keys.end()) {
-			keys.push_back(currentNode.name);
-			missingKeys.erase(find(missingKeys.begin(), missingKeys.end(), currentNode.name));
+	class State {
+		vector<char> keys;
+		int steps;
+	};
+	
+	static string makeStateKey(vector<char> &keys) {
+		string key = "";
+		for (auto i = keys.begin(); i != keys.end(); i++)
+		{
+			key = key + *i;
 		}
 
+		return key;
+	}
+
+	static void findKeys(Node& currentNode, map<char, map<string, int>> &seen, vector<char> keys, vector<char> missingKeys, int totalSteps, int &stepsOnFinish) {
+		if (stepsOnFinish != 0 && totalSteps >= stepsOnFinish)
+			return;
+		if (isKey(currentNode.name) && find(keys.begin(), keys.end(), currentNode.name) == keys.end()) {
+			keys.push_back(currentNode.name);
+			sort(keys.begin(), keys.end());
+			missingKeys.erase(find(missingKeys.begin(), missingKeys.end(), currentNode.name));
+		}
+		string key = makeStateKey(keys);
+		if (seen[currentNode.name][key] != 0 && totalSteps >= seen[currentNode.name][key])
+			return;
+		/*auto si = seen[currentNode.name].begin();
+		while (si != seen[currentNode.name].end()) {
+			string str = si->first;
+			if (str.size() < keys.size()) {
+				si++;
+				continue;
+			}
+				
+			bool foundall = true;
+			for (int i = 0; i < keys.size(); i++)
+			{
+				if (find(str.begin(), str.end(), keys[i]) == str.end()) {
+					foundall = false;
+					break;
+				}
+			}
+			if (foundall && si->second != 0 && totalSteps >= si->second)
+				return;
+			si++;
+		}*/
+		seen[currentNode.name][key] = totalSteps;
+
+
 		if (missingKeys.size() == 0) {
-			stepsOnFinish.push_back(totalSteps);
+			if (stepsOnFinish != 0 && stepsOnFinish < totalSteps)
+				throw;
+			stepsOnFinish = totalSteps;
 			return;
 		}
 
@@ -130,14 +165,8 @@ class Day18 {
 		while (it != currentNode.connectedNodes.end()) {
 			for (int idx = 0; idx < currentNode.distances[it->first].size(); idx++)
 			{
-				bool reqsFulfilled = true;
-				Node n = *it->second;
-				for (auto itreqs = currentNode.reqs[n.name][idx].begin(); itreqs != currentNode.reqs[n.name][idx].end(); itreqs++)
-				{
-					if (find(keys.begin(), keys.end(), tolower(*itreqs)) == keys.end())
-						reqsFulfilled = false;
-				}
-				if (!reqsFulfilled)
+				Node& n = *it->second;
+				if (isDoor(n.name) && find(keys.begin(), keys.end(), tolower(n.name)) == keys.end())
 					continue;
 
 				findKeys(*it->second, seen, keys, missingKeys, totalSteps + currentNode.distances[it->first][idx], stepsOnFinish);
@@ -154,10 +183,9 @@ public:
 		map<char, Node> nodes = getNodes(g, missingKeys);
 		getEdges(g, nodes);
 		vector<char> keys;
-		vector<int> stepsOnFinish;
-		map<char, int> seen;
+		int stepsOnFinish = 0;
+		map<char, map<string, int>> seen;
 		findKeys(nodes[character], seen, keys, missingKeys, 0, stepsOnFinish);
-		auto minimum = min_element(stepsOnFinish.begin(), stepsOnFinish.end());
-		cout << "Pt1: " << *minimum << endl;
+		cout << "Pt1: " << stepsOnFinish << endl;
 	}
 };
