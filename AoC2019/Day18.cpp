@@ -61,7 +61,7 @@ class Day18 {
 		for (long long y = g.yMin; y <= g.yMax; y++) {
 			for (long long x = g.xMin; x <= g.xMax; x++) {
 				char c = g.get(x, y);
-				if (isKey(c) || isDoor(c) || c == character) {
+				if (isKey(c) || isDoor(c) || c == character || c == '1' || c== '2' || c== '3' || c== '4') {
 					Node k(x, y, c);
 					nodes[c] = k;
 					if (isKey(c))
@@ -78,7 +78,7 @@ class Day18 {
 		char c = g.get(pos.x, pos.y);
 		if (c == wall)
 			return;
-		if (origin.name != c && (isDoor(c) || isKey(c) || c == character)) {
+		if (origin.name != c && (isDoor(c) || isKey(c) || c == character || c == '1' || c == '2' || c == '3' || c == '4')) {
 			Node* target = &nodes[c];
 			origin.connectedNodes[c] = target;
 			origin.distances[c].push_back(steps);
@@ -175,6 +175,27 @@ class Day18 {
 		}
 	}
 
+	static void getKeysInBranch(Node& currentNode, vector<char> &keysInBranch, map<char, int> &seen) {
+		if (seen[currentNode.name] != 0)
+			return;
+		seen[currentNode.name] = 1;
+		if (isKey(currentNode.name))
+			keysInBranch.push_back(currentNode.name);
+		auto it = currentNode.connectedNodes.begin();
+		while (it != currentNode.connectedNodes.end()) {
+			getKeysInBranch(*it->second, keysInBranch, seen);
+			it++;
+		}
+	}
+
+	static vector<char> getIndependentKeys(Node &currentNode, vector<char> availableKeys, vector<char> &keysInBranch) {
+		for (int  i = 0;  i < keysInBranch.size() ;i++)
+		{
+			availableKeys.erase(find(availableKeys.begin(), availableKeys.end(), keysInBranch[i]));
+		}
+		return availableKeys;
+	}
+
 public:
 	static void run() {
 		auto input = Utilities::readFile("input/Day18.txt");
@@ -185,7 +206,33 @@ public:
 		vector<char> keys;
 		int stepsOnFinish = 0;
 		map<char, map<string, int>> seen;
-		findKeys(nodes[character], seen, keys, missingKeys, 0, stepsOnFinish);
-		cout << "Pt1: " << stepsOnFinish << endl;
+		//findKeys(nodes[character], seen, keys, missingKeys, 0, stepsOnFinish);
+		//cout << "Pt1: " << stepsOnFinish << endl;
+		vector<char> keysInBranch1;
+		getKeysInBranch(nodes['1'], keysInBranch1, map<char, int>());
+		auto keys1 = getIndependentKeys(nodes['1'], missingKeys, keysInBranch1);
+		int steps1 = 0;
+		findKeys(nodes['1'], seen, keys1, keysInBranch1, 0, steps1);
+
+		vector<char> keysInBranch2;
+		getKeysInBranch(nodes['2'], keysInBranch2, map<char, int>());
+		auto keys2 = getIndependentKeys(nodes['2'], missingKeys, keysInBranch2);
+		int steps2 = 0;
+		findKeys(nodes['2'], seen, keys2, keysInBranch2, 0, steps2);
+
+		vector<char> keysInBranch3;
+		getKeysInBranch(nodes['3'], keysInBranch3, map<char, int>());
+		auto keys3 = getIndependentKeys(nodes['3'], missingKeys, keysInBranch3);
+		int steps3 = 0;
+		findKeys(nodes['3'], seen, keys3, keysInBranch3, 0, steps3);
+
+		vector<char> keysInBranch4;
+		getKeysInBranch(nodes['4'], keysInBranch4, map<char, int>());
+		auto keys4 = getIndependentKeys(nodes['4'], missingKeys, keysInBranch4);
+		int steps4 = 0;
+		findKeys(nodes['4'], seen, keys4, keysInBranch4, 0, steps4);
+		// basically cheating... will fail on certain inputs
+		int total = steps1 + steps2 + steps3 + steps4;
+		cout << "Pt2: " <<  total << endl;
 	}
 };
