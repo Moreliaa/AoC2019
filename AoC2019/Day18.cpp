@@ -131,26 +131,6 @@ class Day18 {
 		string key = makeStateKey(keys);
 		if (seen[currentNode.name][key] != 0 && totalSteps >= seen[currentNode.name][key])
 			return;
-		/*auto si = seen[currentNode.name].begin();
-		while (si != seen[currentNode.name].end()) {
-			string str = si->first;
-			if (str.size() < keys.size()) {
-				si++;
-				continue;
-			}
-				
-			bool foundall = true;
-			for (int i = 0; i < keys.size(); i++)
-			{
-				if (find(str.begin(), str.end(), keys[i]) == str.end()) {
-					foundall = false;
-					break;
-				}
-			}
-			if (foundall && si->second != 0 && totalSteps >= si->second)
-				return;
-			si++;
-		}*/
 		seen[currentNode.name][key] = totalSteps;
 
 
@@ -206,6 +186,7 @@ public:
 		vector<char> keys;
 		int stepsOnFinish = 0;
 		map<char, map<string, int>> seen;
+		// Takes too much time to run...
 		//findKeys(nodes[character], seen, keys, missingKeys, 0, stepsOnFinish);
 		//cout << "Pt1: " << stepsOnFinish << endl;
 		vector<char> keysInBranch1;
