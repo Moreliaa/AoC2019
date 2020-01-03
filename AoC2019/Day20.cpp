@@ -31,6 +31,8 @@ class Day20 {
 			for (unsigned i = 0; i < line.size(); i++)
 			{
 				char chara = line[i];
+				if (chara == 32)
+					chara = '#';
 				g.put(x, y, chara);
 				x++;
 			}
@@ -157,37 +159,70 @@ class Day20 {
 		return portals[key];
 	}
 
-	static void bfs(Grid<char>& g, Grid<int> &seen, map<string, Portal> &portals, Point pos, Point lastPos, int steps) {
-		if (pos.x < g.xMin || pos.x > g.xMax || pos.y < g.yMin || pos.y > g.yMax)
-			return;
-		char c = g.get(pos.x, pos.y);
-		if (c == '#')
-			return;
-		if (isDoor(c)) {
-			Portal portal = getPortal(g, portals, pos, c);
-			if (portal.name == "AA")
-				return;
-			if (portal.name == "ZZ") {
-				return;
-			}
-			if (lastPos.x == portal.p1.x && lastPos.y == portal.p1.y) {
-				pos.x = portal.p2.x;
-				pos.y = portal.p2.y;
-			}
-			else {
-				pos.x = portal.p1.x;
-				pos.y = portal.p1.y;
-			}
-		}
-		if (seen.seenPos(pos.x, pos.y) && steps >= seen.get(pos.x, pos.y))
-			return;
-		seen.put(pos.x, pos.y, steps);
+	static bool isOuterRing(Grid<char>& g, Point& pos) {
+		return pos.x == 2 || pos.y == 2 || pos.x == g.xMax - 2 || pos.y == g.yMax - 2;
+	}
+
+	static void dijkstra(Grid<char>& g, Grid<int> &distances, Grid<int>& visited, Grid<int>& unvisited, map<string, Portal> &portals, Point pos, int recursionLevel, int steps) {
+		distances.put(pos.x, pos.y, steps, to_string(recursionLevel));
+		visited.put(pos.x, pos.y, 1, to_string(recursionLevel));
+		auto unvis = unvisited.grid.find(Grid<int>::createKey(pos.x, pos.y, to_string(recursionLevel)));
+		if (unvis != unvisited.grid.end())
+			unvisited.grid.erase(unvis);
 		steps++;
 
-		bfs(g, seen, portals, Point(pos.x - 1, pos.y), pos, steps);
-		bfs(g, seen, portals, Point(pos.x + 1, pos.y), pos, steps);
-		bfs(g, seen, portals, Point(pos.x, pos.y - 1), pos, steps);
-		bfs(g, seen, portals, Point(pos.x, pos.y + 1), pos, steps);
+		vector<Point> points = { 
+			Point(pos.x - 1, pos.y),
+			Point(pos.x + 1, pos.y),
+			Point(pos.x, pos.y - 1),
+			Point(pos.x, pos.y + 1)
+		};
+		for each (Point p in points)
+		{
+			int nextRecursionLevel = recursionLevel;
+			if (p.x < g.xMin || p.x > g.xMax || p.y < g.yMin || p.y > g.yMax) {
+				continue;
+			}
+			char c = g.get(p.x, p.y);
+			if (c == '#') {
+				continue;
+			}
+			if (isDoor(c)) {
+				bool isOuter = isOuterRing(g, pos);
+				Portal portal = getPortal(g, portals, p, c);
+				if (nextRecursionLevel == 0 && isOuter) {
+					if (portal.name == "ZZ") {
+						return; // done
+					}
+					else { // wall
+						continue;
+					}
+				} else if (nextRecursionLevel != 0 && (portal.name == "AA" || portal.name == "ZZ"))
+				{ // wall
+					continue;
+				}
+				
+				if (pos.x == portal.p1.x && pos.y == portal.p1.y) {
+					p.x = portal.p2.x;
+					p.y = portal.p2.y;
+				}
+				else {
+					p.x = portal.p1.x;
+					p.y = portal.p1.y;
+				}
+				if (isOuter)
+					nextRecursionLevel--;
+				else
+					nextRecursionLevel++;
+			}
+
+			bool hasEntry = distances.seenPos(p.x, p.y, to_string(nextRecursionLevel));
+			if (hasEntry)
+				continue;
+			distances.put(p.x, p.y, steps, to_string(nextRecursionLevel));
+			unvisited.put(p.x, p.y, 1, to_string(nextRecursionLevel));
+		}
+		
 	}
 
 
@@ -196,9 +231,43 @@ public:
 		auto input = Utilities::readFile("input/Day20.txt");
 		Grid<char> g = createGrid(input);
 		map<string, Portal> portals = getNodes(g);
-		Grid<int> seen;
-		bfs(g, seen, portals, portals["AA"].p1, portals["AA"].p1, 0);
+		Grid<int> distances;
+		Grid<int> visited;
+		Grid<int> unvisited;
+		dijkstra(g, distances, visited, unvisited, portals, portals["AA"].p1, 0, 0);
+		while (!distances.seenPos(portals["ZZ"].p1.x, portals["ZZ"].p1.y, "0")) {
+			vector<string> splitKey;
+			int newx = -1;
+			int newy = -1;
+			int newRec = -1;
+			int nextSteps = -1;
+			string nextKey;
+			for (auto it = unvisited.grid.begin(); it != unvisited.grid.end(); it++)
+			{
+					int s = distances.grid[it->first];
+					if (s < nextSteps || nextSteps == -1)
+					{
+						nextSteps = s;
+						nextKey = it->first;
+						splitKey = Utilities::splitString(nextKey, ",");
+						newRec = stoi(splitKey[2]);
+					}
+					else if (s == nextSteps) {
+						vector<string> checkedKey = Utilities::splitString(it->first, ",");
+						int  checkedRec = stoi(checkedKey[2]);
+						if (checkedRec < newRec) {
+							splitKey = checkedKey;
+							newRec = checkedRec;
+						}
+					}
+			}
+			newx = stoi(splitKey[0]);
+			newy = stoi(splitKey[1]);
+			
+			
+			dijkstra(g, distances, visited, unvisited, portals, Point(newx, newy), newRec, nextSteps);
+		}
 		
-		cout << "Pt1: " << seen.get(portals["ZZ"].p1.x, portals["ZZ"].p1.y) << endl;
+		cout << "Pt2: " << distances.get(portals["ZZ"].p1.x, portals["ZZ"].p1.y, "0") << endl;
 	}
 };

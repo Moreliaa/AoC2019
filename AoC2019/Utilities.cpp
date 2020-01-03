@@ -94,8 +94,10 @@ public:
 		this->grid = map<string, T>();
 	}
 
-	static string createKey(long long x, long long y) {
-		return to_string(x) + "," + to_string(y);
+	static string createKey(long long x, long long y, string additionalIdentifier="") {
+		if (additionalIdentifier != "")
+			additionalIdentifier = "," + additionalIdentifier;
+		return to_string(x) + "," + to_string(y) + additionalIdentifier;
 	}
 
 	static Point parsePos(string key) {
@@ -104,17 +106,17 @@ public:
 		return p;
 	}
 
-	bool seenPos(long long x, long long y) {
-		auto it = grid.find(createKey(x, y));
+	bool seenPos(long long x, long long y, string additionalIdentifier="") {
+		auto it = grid.find(createKey(x, y,additionalIdentifier));
 		return it != grid.end();
 	}
 
-	T& get(long long x, long long y) {
-		return grid[createKey(x, y)];
+	T& get(long long x, long long y, string additionalIdentifier="") {
+		return grid[createKey(x, y, additionalIdentifier)];
 	}
 
-	void put(long long x, long long y, T val) {
-		grid[createKey(x, y)] = val;
+	void put(long long x, long long y, T val, string additionalIdentifier="") {
+		grid[createKey(x, y,additionalIdentifier)] = val;
 		xMin = min(xMin, x);
 		xMax = max(xMax, x);
 		yMin = min(yMin, y);
