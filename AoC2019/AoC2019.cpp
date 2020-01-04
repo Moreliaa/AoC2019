@@ -21,6 +21,7 @@
 #include "Day19.cpp"
 #include "Day20.cpp"
 #include "Day21.cpp"
+#include "Day22.cpp"
 
 int main()
 {
@@ -45,7 +46,8 @@ int main()
 	//Day18::run();
 	//Day19::run();
 	//Day20::run();
-	Day21::run();
+	//Day21::run();
+	Day22::run();
 	auto end = chrono::system_clock::now();
 	chrono::duration<double> elapsed_time = end - start;
 	cout << "Time spent: " << elapsed_time.count() << " seconds" << endl;
